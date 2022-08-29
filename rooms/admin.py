@@ -1,5 +1,6 @@
 from atexit import register
 from django.contrib import admin
+from django.utils.safestring import mark_safe
 from . import models
 # Register your models here.
 
@@ -16,6 +17,10 @@ class ItemAdmin(admin.ModelAdmin):
     
     pass
 
+class PhotoInline(admin.TabularInline):
+
+    model = models.Photo
+
 
 
 
@@ -24,22 +29,7 @@ class RoomAdmin(admin.ModelAdmin):
     
     """ Room Admin Definition """
 
-    # fieldsets = (
-    #     (
-    #         "Basic Info", 
-    #         {"fields" : ("name", "description", "country", "address", "price")},
-    #     ),
-    #     ("Times", {"fields": ("check_in", "check_out", "instant_book")}),
-    #     ("Spaces", {"fields": ("guests", "beds", "bedrooms", "baths")}),
-    #     (
-    #         "More About the Space",
-    #         {
-    #             "classes": ("collapse",),
-    #             "fields": ("amenities", "facilities", "house_rules"),
-    #         },
-    #     ),
-    #     ("Last Details", {"fields": ("host",)}),
-    # )
+    inlines = (PhotoInline,)
 
     fieldsets = (
         (
@@ -88,6 +78,7 @@ class RoomAdmin(admin.ModelAdmin):
         "country",
     )
 
+    raw_id_fields = ("host",)
 
     search_fields = ("=city", "^host__username")
 
@@ -106,6 +97,11 @@ class RoomAdmin(admin.ModelAdmin):
 @admin.register(models.Photo)
 class PhotoAdmin(admin.ModelAdmin):
 
-    """ """
+    """ Photo Admin Definition """
 
-    pass
+    list_display = ('__str__', "get_thumbnail")
+
+    def get_thumbnail(self, obj):
+        return mark_safe(f'<img width="50px" src="{obj.file.url}" />')
+
+    get_thumbnail.short_description = "Thumbnail"
